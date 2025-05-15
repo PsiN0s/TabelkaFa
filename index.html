@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Testowa tabelka</title>
+<style>
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #999; padding: 8px; }
+  nav button { margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<h1>TestTabelka</h1>
+
+<nav id="tabs"></nav>
+
+<div id="data"></div>
+
+<script>
+const spreadsheetId = '1XOWK_hkGoWFBfOOYP_XcXkO_QqqgFSZxHXwyl6pTP2U';
+
+const sheets = [
+  { name: 'Arkusz1', gid: '0' },
+  { name: 'Arkusz2', gid: '1806599655' }
+];
+
+const tabsContainer = document.getElementById('tabs');
+const dataContainer = document.getElementById('data');
+
+function csvToArray(str) {
+  const rows = str.trim().split('\n');
+  return rows.map(r => r.split(','));
+}
+
+function renderTable(data) {
+  let html = '<table><thead><tr>';
+  data[0].forEach(header => html += `<th>${header}</th>`);
+  html += '</tr></thead><tbody>';
+  for(let i = 1; i < data.length; i++) {
+    html += '<tr>';
+    data[i].forEach(cell => html += `<td>${cell}</td>`);
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+async function fetchSheet(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+  const response = await fetch(url);
+  const text = await response.text();
+  return csvToArray(text);
+}
+
+async function loadSheet(gid) {
+  dataContainer.innerHTML = 'Ładowanie...';
+  try {
+    const data = await fetchSheet(gid);
+    dataContainer.innerHTML = renderTable(data);
+  } catch(e) {
+    dataContainer.innerHTML = 'Błąd ładowania danych.';
+  }
+}
+
+function createTabs() {
+  sheets.forEach(sheet => {
+    const btn = document.createElement('button');
+    btn.textContent = sheet.name;
+    btn.onclick = () => loadSheet(sheet.gid);
+    tabsContainer.appendChild(btn);
+  });
+}
+
+createTabs();
+loadSheet(sheets[0].gid);
+</script>
+
+</body>
+</html>
