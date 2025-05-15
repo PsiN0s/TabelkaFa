@@ -2,82 +2,99 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Wykresy-FA</title>
+  <title>Wykres z Google Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
-      background: #f7f7f7;
     }
-    canvas {
+
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .chart-container {
       background: white;
-      border: 1px solid #ddd;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      max-width: 800px;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
+      max-width: 700px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
     }
   </style>
 </head>
 <body>
-  <h2>Wykres - test</h2>
-  <canvas id="myChart" height="400"></canvas>
+
+  <h1>Wykres z Google Sheets</h1>
+  <div class="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
 
   <script>
-    const spreadsheetId = '1XOWK_hkGoWFBfOOYP_XcXkO_QqqgFSZxHXwyl6pTP2U'; // <-- Twój ID
-    const gid = '0'; // <-- Twój gid
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/1XOWK_hkGoWFBfOOYP_XcXkO_QqqgFSZxHXwyl6pTP2U/export?format=csv&gid=0';
 
-    async function fetchCSV() {
-      const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
-      const res = await fetch(url);
-      return await res.text();
-    }
-
-    function parseCSV(csv) {
-      const lines = csv.trim().split('\n');
-      const data = lines.slice(1).map(line => {
-        const [label, value] = line.split(',');
-        return { label, value: parseFloat(value) };
-      });
-      return {
-        labels: data.map(row => row.label),
-        values: data.map(row => row.value),
-      };
-    }
+    const colors = [
+      '#3366cc', '#dc3912', '#ff9900', '#109618', '#990099',
+      '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395',
+      '#994499', '#22aa99', '#aaaa11', '#6633cc', '#e67300',
+      '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'
+    ];
 
     async function drawChart() {
-      const csv = await fetchCSV();
-      const { labels, values } = parseCSV(csv);
+      const res = await fetch(csvUrl);
+      const text = await res.text();
+      const rows = text.trim().split('\n').slice(1);
+      const labels = [];
+      const data = [];
 
-      new Chart(document.getElementById('myChart'), {
-        type: 'pie', // Możesz też dać: 'bar'
+      rows.forEach(row => {
+        const [name, value] = row.split(',');
+        labels.push(name);
+        data.push(Number(value));
+      });
+
+      new Chart(document.getElementById('chart'), {
+        type: 'pie',
         data: {
-          labels,
+          labels: labels,
           datasets: [{
-            label: 'Wartość',
-            data: values,
-            borderColor: '#4285F4',
-            backgroundColor: 'rgba(66,133,244,0.2)',
-            pointBackgroundColor: '#4285F4',
-            fill: true,
-            tension: 0.3
+            data: data,
+            backgroundColor: colors,
+            borderColor: '#fff',
+            borderWidth: 2
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: true },
-          },
-          scales: {
-            x: {
-              title: { display: true, text: 'Data' }
+            legend: {
+              position: 'right',
+              labels: {
+                font: { size: 14 },
+                color: '#444'
+              }
             },
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Wartość' }
+            title: {
+              display: true,
+              text: 'Rozkład odpowiedzi',
+              font: { size: 18 },
+              color: '#222'
             }
           }
         }
