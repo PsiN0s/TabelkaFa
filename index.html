@@ -2,11 +2,14 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Wykres z Google Sheets</title>
+  <title>Wykres procentowy z Google Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Plugin do procentów -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -69,6 +72,8 @@
         data.push(Number(value));
       });
 
+      const total = data.reduce((sum, val) => sum + val, 0);
+
       new Chart(document.getElementById('chart'), {
         type: 'pie',
         data: {
@@ -92,12 +97,24 @@
             },
             title: {
               display: true,
-              text: 'Rozkład odpowiedzi',
+              text: 'Rozkład odpowiedzi (%)',
               font: { size: 18 },
               color: '#222'
+            },
+            datalabels: {
+              color: '#fff',
+              font: {
+                weight: 'bold',
+                size: 14
+              },
+              formatter: (value, context) => {
+                const percentage = (value / total * 100).toFixed(1);
+                return `${percentage}%`;
+              }
             }
           }
-        }
+        },
+        plugins: [ChartDataLabels]
       });
     }
 
