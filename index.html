@@ -1,126 +1,37 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Wykresy - FA</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Plugin do procentów -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-  <link rel="icon" href="falogo.png" type="image/png">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 1rem;
-    }
-
-    .chart-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 700px;
-    }
-
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wykres z Google Sheets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        iframe {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-
-  <h1>tościk teścik</h1>
-  <div class="chart-container">
-    <canvas id="chart"></canvas>
-  </div>
-
-  <script>
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pubchart?oid=123456789&amp;format=interactive" 
-  width="600" height="400" frameborder="0" scrolling="no"></iframe>
-
-    const colors = [
-      '#3366cc', '#dc3912', '#ff9900', '#109618', '#990099',
-      '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395',
-      '#994499', '#22aa99', '#aaaa11', '#6633cc', '#e67300',
-      '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac'
-    ];
-
-    async function drawChart() {
-      const res = await fetch(csvUrl);
-      const text = await res.text();
-      const rows = text.trim().split('\n').slice(1);
-      const labels = [];
-      const data = [];
-
-      rows.forEach(row => {
-        const [name, value] = row.split(',');
-        labels.push(name);
-        data.push(Number(value));
-      });
-
-      const total = data.reduce((sum, val) => sum + val, 0);
-
-      new Chart(document.getElementById('chart'), {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: colors,
-            borderColor: '#fff',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                font: { size: 14 },
-                color: '#444'
-              }
-            },
-            title: {
-              display: true,
-              text: 'Osoba dowodząca akcją',
-              font: { size: 18 },
-              color: '#222'
-            },
-            datalabels: {
-              color: '#fff',
-              font: {
-                weight: 'bold',
-                size: 14
-              },
-              formatter: (value, context) => {
-                const percentage = (value / total * 100).toFixed(1);
-                return `${percentage}%`;
-              }
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    }
-
-    drawChart();
-  </script>
+    <h1>Wykres z Google Sheets</h1>
+    <!-- Wklej swój iframe z publikacji wykresu Google Sheets tutaj: -->
+    <iframe 
+        src="https://docs.google.com/spreadsheets/d/1BUnlBlpVsGrOibgFh30vjf4FkxLsbY4FP7qlpbJ9PTs/edit?resourcekey=&gid=1772581817#gid=1772581817" 
+        width="700" 
+        height="450" 
+        scrolling="no">
+    </iframe>
 </body>
 </html>
