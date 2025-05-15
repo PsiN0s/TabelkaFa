@@ -1,88 +1,90 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<title>Testowa tabelka</title>
-<style>
-table { 
-border-collapse: collapse; width: 100%; 
-}
-td, th {
-border: 1px solid #999; padding: 8px; 
-}
-nav button { 
-margin-right: 5px; 
-}
-body {
-  margin: 0px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Wykres z Google Sheets</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      background: #f7f7f7;
+    }
+    canvas {
+      background: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      max-width: 800px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
+  <h2>Wykres z Google Sheets</h2>
+  <canvas id="myChart" height="400"></canvas>
 
-<h1>TestTabelka</h1>
+  <script>
+    const spreadsheetId = '1XOWK_hkGoWFBfOOYP_XcXkO_QqqgFSZxHXwyl6pTP2U'; // <-- Twój ID
+    const gid = '0'; // <-- Twój gid
 
-<nav id="tabs"></nav>
+    async function fetchCSV() {
+      const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+      const res = await fetch(url);
+      return await res.text();
+    }
 
-<div id="data"></div>
+    function parseCSV(csv) {
+      const lines = csv.trim().split('\n');
+      const data = lines.slice(1).map(line => {
+        const [label, value] = line.split(',');
+        return { label, value: parseFloat(value) };
+      });
+      return {
+        labels: data.map(row => row.label),
+        values: data.map(row => row.value),
+      };
+    }
 
-<script>
-const spreadsheetId = '1BUnlBlpVsGrOibgFh30vjf4FkxLsbY4FP7qlpbJ9PTs';
+    async function drawChart() {
+      const csv = await fetchCSV();
+      const { labels, values } = parseCSV(csv);
 
-const sheets = [
-  { name: 'BOLO', gid: '1772581817' },
-];
+      new Chart(document.getElementById('myChart'), {
+        type: 'line', // Możesz też dać: 'bar'
+        data: {
+          labels,
+          datasets: [{
+            label: 'Wartość',
+            data: values,
+            borderColor: '#4285F4',
+            backgroundColor: 'rgba(66,133,244,0.2)',
+            pointBackgroundColor: '#4285F4',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Data' }
+            },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Wartość' }
+            }
+          }
+        }
+      });
+    }
 
-const tabsContainer = document.getElementById('tabs');
-const dataContainer = document.getElementById('data');
-
-function csvToArray(str) {
-  const rows = str.trim().split('\n');
-  return rows.map(r => r.split(','));
-}
-
-function renderTable(data) {
-  let html = '<table><thead><tr>';
-  data[0].forEach(header => html += `<th>${header}</th>`);
-  html += '</tr></thead><tbody>';
-  for(let i = 1; i < data.length; i++) {
-    html += '<tr>';
-    data[i].forEach(cell => html += `<td>${cell}</td>`);
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
-  return html;
-}
-
-async function fetchSheet(gid) {
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
-  const response = await fetch(url);
-  const text = await response.text();
-  return csvToArray(text);
-}
-
-async function loadSheet(gid) {
-  dataContainer.innerHTML = 'Ładowanie...';
-  try {
-    const data = await fetchSheet(gid);
-    dataContainer.innerHTML = renderTable(data);
-  } catch(e) {
-    dataContainer.innerHTML = 'Błąd ładowania danych.';
-  }
-}
-
-function createTabs() {
-  sheets.forEach(sheet => {
-    const btn = document.createElement('button');
-    btn.textContent = sheet.name;
-    btn.onclick = () => loadSheet(sheet.gid);
-    tabsContainer.appendChild(btn);
-  });
-}
-
-createTabs();
-loadSheet(sheets[0].gid);
-</script>
-
+    drawChart();
+  </script>
 </body>
 </html>
